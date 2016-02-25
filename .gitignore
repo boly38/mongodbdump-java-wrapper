@@ -1,0 +1,6 @@
+.settings
+.project
+.classpath
+dump
+target
+MongoDbDumpJavaWrapper.log
