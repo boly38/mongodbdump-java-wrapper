@@ -6,6 +6,10 @@ import java.security.InvalidParameterException;
 
 import org.internetresources.util.mongodump.domain.BackupConfiguration;
 import org.internetresources.util.mongodump.domain.MongoServerHostConfiguration;
+import org.internetresources.util.mongodump.domain.RestoreConfiguration;
+import org.internetresources.util.mongodump.domain.RestoreException;
+import org.internetresources.util.mongodump.domain.SpyLogs;
+import org.internetresources.util.mongodump.domain.StreamPrinter;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -34,44 +38,71 @@ public class MongodumpService {
 		}
 	}
 
-	public synchronized void backup(BackupConfiguration backupConf) {
+	public synchronized String backup(BackupConfiguration backupConf) throws RestoreException {
 		String db = backupConf != null ? backupConf.getDbName() : null;
 		notEmpty(db, "database name is required");
 		String cmd = getHostConfig().getMongoDumpBinAbsolutePath();
 		String collection = backupConf.getCollectionName();
 		String outDir = backupConf.getBackupDirectory();
-		_backupCmd(cmd,db,collection,outDir);
+		return _backupCmd(cmd,db,collection,outDir);
 	}
 
-	private void _backupCmd(String cmd, String db, String collection, String outDir) {
+	private String _backupCmd(String cmd, String db, String collection, String outDir) throws RestoreException {
 		log.info("backup cmd:{}, db:{}, collection:{}, out:{}",
 				cmd, db, collection != null ? collection : "(not set)", outDir);
 		
 		
 		ProcessBuilder builder;
+		String finalZipName = String.format("%s%s%s.zip", outDir, File.separator, db);
+		String archiveOption = String.format("/archive:%s", finalZipName);
 		if (collection != null) {
-			builder = new ProcessBuilder(cmd, "--db", db,"--collection", collection, "--out" ,outDir);
+			builder = new ProcessBuilder(cmd, archiveOption, "--gzip", "--db", db,"--collection", collection);
 		} else {
-			builder = new ProcessBuilder(cmd, "--db", db, "--out" ,outDir);
+			builder = new ProcessBuilder(cmd, archiveOption, "--gzip", "--db", db); // , "--out" ,outDir);
 		}
-		builder.inheritIO(); 
+		// builder.inheritIO(); 
 		
 		try {
-			// final Process process = 
-			builder.start();
+			SpyLogs spyLogs = new SpyLogs();
+			SpyLogs spyErrorLogs = new SpyLogs();
+            int errorId = spyErrorLogs.addSpy("error");
+			Process process = builder.start();
+			log.info("please notice that mongodump reports all dump action into stderr (not only errors)");
+            StreamPrinter fluxErreur = new StreamPrinter("[mongodump.exe ERR]", process.getErrorStream(), spyErrorLogs);
+            StreamPrinter fluxSortie = new StreamPrinter("[mongodump.exe]",     process.getInputStream(), spyLogs);
+            fluxErreur.start();
+            fluxSortie.start();
+
+			process.waitFor();
+            int exitValue = process.exitValue();
+            if (exitValue == 0) {
+        		log.info("BACKUP created : {}", finalZipName);
+            	return finalZipName;
+            }
+            String errorMsg = null;
+            if (!spyErrorLogs.hasSpy(errorId)) {
+            	errorMsg = spyErrorLogs.getRecorderdSpy(errorId);
+            }
+            throw new RestoreException(exitValue, errorMsg);
 		} catch (IOException e) {
-			log.error("Error during the backup of '{}' : {}", db, e.getMessage(), e);
+			String errMsg = String.format("Error during the backup of '%s' : %s", db, e.getMessage());
+			log.error(errMsg, e);
+			throw new RestoreException(errMsg);
+		} catch (InterruptedException e) {
+			String errMsg = String.format("Interruption during the backup of '{}' : {}", db, e.getMessage());
+			log.error(errMsg, e);
+			throw new RestoreException(errMsg);
 		}
 
 	}
 
-	public synchronized void restore(BackupConfiguration backupConf) {
-		String db = backupConf != null ? backupConf.getDbName() : null;
+	public synchronized void restore(RestoreConfiguration restoreConf) throws RestoreException {
+		String db = restoreConf != null ? restoreConf.getDbName() : null;
 		notEmpty(db, "database name is required");
 		String cmd = getHostConfig().getMongoRestoreBinAbsolutePath();
-		String collection = backupConf.getCollectionName();
-		String backupDir = backupConf.getBackupDirectory();
-		_restoreCmd(cmd,db,collection,backupDir);
+		String collection = restoreConf.getCollectionName();
+		String backupFile = restoreConf.getBackupFile();
+		_restoreCmd(cmd,db,collection,backupFile);
 	}
 
 
@@ -81,27 +112,56 @@ public class MongodumpService {
 	 * @param cmd
 	 * @param db
 	 * @param collection
-	 * @param inputDir
+	 * @throws RestoreException 
 	 */
-	private void _restoreCmd(String cmd, String db, String collection, String inputDir) {
-		String inputBackupDir = String.format("%s%s%s", inputDir, File.separator, db);
-		log.info("restore cmd:{}, db:{}, collection:{}, inputBackupDirectory:{}",
-				cmd, db, collection != null ? collection : "(not set)", inputBackupDir);
-		
+	private void _restoreCmd(String cmd, String db, String collection, String backupFile) throws RestoreException {
+		log.info("restore cmd:{}, db:{}, collection:{}, backupFile:{}",
+				cmd, db, collection != null ? collection : "(not set)", backupFile);
 		
 		ProcessBuilder builder;
+		String archiveOption = String.format("/archive:%s", backupFile);
 		if (collection != null) {
-			builder = new ProcessBuilder(cmd, "--drop", "--db", db,"--collection", collection, inputBackupDir);
+			builder = new ProcessBuilder(cmd, archiveOption, "--gzip", "-v", "--drop", "--db", db,"--collection", collection);
 		} else {
-			builder = new ProcessBuilder(cmd, "--drop", "--db", db, inputBackupDir);
+			builder = new ProcessBuilder(cmd, archiveOption, "--gzip", "-v", "--drop", "--db", db);
 		}
-		builder.inheritIO(); 
+		// builder.inheritIO(); 
 		
 		try {
-			// final Process process = 
-			builder.start();
+			SpyLogs spyLogs = new SpyLogs();
+			SpyLogs spyErrorLogs = new SpyLogs();
+			int errorId = spyErrorLogs.addSpy("error");
+			int failedId = spyErrorLogs.addSpy("Failed");
+			Process process = builder.start();
+			log.info("please notice that mongorestore reports all restore action into stderr (not only errors)");
+            StreamPrinter fluxErreur = new StreamPrinter("[mongorestore.exe ERR]", process.getErrorStream(), spyErrorLogs);
+            StreamPrinter fluxSortie = new StreamPrinter("[mongorestore.exe]",     process.getInputStream(), spyLogs);
+            fluxErreur.start();
+            fluxSortie.start();
+
+			process.waitFor();
+            int exitValue = process.exitValue();
+            if (exitValue == 0) {
+        		log.info("restored with success : {}", backupFile);
+            	return;
+            }
+            String errorMsg = null;
+            if (!spyErrorLogs.hasSpy(errorId)) {
+            	errorMsg = spyErrorLogs.getRecorderdSpy(errorId);
+                throw new RestoreException(exitValue, errorMsg);
+            }
+            if (!spyErrorLogs.hasSpy(failedId)) {
+            	errorMsg = spyErrorLogs.getRecorderdSpy(errorId);
+                throw new RestoreException(exitValue, errorMsg);
+            }
 		} catch (IOException e) {
-			log.error("Error during the restore of '{}' : {}", db, e.getMessage(), e);
+			String errMsg = String.format("Error during the restore of '%s' : %s", db, e.getMessage());
+			log.error(errMsg, e);
+			throw new RestoreException(errMsg);
+		} catch (InterruptedException e) {
+			String errMsg = String.format("Interruption during the of of '{}' : {}", db, e.getMessage());
+			log.error(errMsg, e);
+			throw new RestoreException(errMsg);
 		}
 
 	}

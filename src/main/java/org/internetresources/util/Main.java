@@ -14,6 +14,7 @@ import org.apache.commons.cli.PosixParser;
 import org.internetresources.util.mongodump.MongodumpService;
 import org.internetresources.util.mongodump.domain.BackupConfiguration;
 import org.internetresources.util.mongodump.domain.MongoServerHostConfiguration;
+import org.internetresources.util.mongodump.domain.RestoreConfiguration;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +41,8 @@ public class Main {
         CommandLineParser parser = new PosixParser();
         OPTIONS.addOption(OptionBuilder.withArgName("Help").create("h"));
         OPTIONS.addOption(OptionBuilder.withArgName("Backup directory  (default C:\\TMP\\mongoBackup or /tmp/mongoBackup)").hasArg().create("d"));
-        OPTIONS.addOption(OptionBuilder.withArgName("Database name").hasArg().create("n"));
+        OPTIONS.addOption(OptionBuilder.withArgName("Database name **required**").hasArg().create("n"));
+        OPTIONS.addOption(OptionBuilder.withArgName("Collection name (optional)").hasArg().create("c"));
         OPTIONS.addOption(OptionBuilder.withArgName("action 'BACKUP' or 'RESTORE' (default: BACKUP)").hasArg().create("a"));
         return parser.parse(OPTIONS, args);
     }
@@ -60,17 +62,28 @@ public class Main {
             printUsage();
             return;
         }
-        BackupConfiguration backupConf = new BackupConfiguration();
         MongoServerHostConfiguration hostConf = new MongoServerHostConfiguration();
+        String dbName = null;
 
-        if (cmd.hasOption("d")) {
-            String argVal = cmd.getOptionValue("d");
-            backupConf.setBackupDirectory(argVal);
-        }
-        if (cmd.hasOption("n")) {
+        if (cmd.hasOption("n")) { // db name (required)
             String argVal = cmd.getOptionValue("n");
-            backupConf.setDbName(argVal);
+            dbName = argVal;
+        } else {
+        	printUsage();
+        	return;
         }
+
+        String cOption = null;
+        if (cmd.hasOption("c")) { // collection name (optional)
+            String argVal = cmd.getOptionValue("c");
+            cOption = argVal;
+        }
+        String dOption = null;
+        if (cmd.hasOption("d")) { // backup directory (optional) of file to restore (required)
+            String argVal = cmd.getOptionValue("d");
+            dOption = argVal;
+        }
+
         String action = "BACKUP";
         if (cmd.hasOption("a")) {
             String argVal = cmd.getOptionValue("a");
@@ -79,9 +92,11 @@ public class Main {
         try {
 			MongodumpService dumpSvc = MongodumpService.getInstance(hostConf);
 	        if ("BACKUP".equals(action)) {
+	            BackupConfiguration backupConf = BackupConfiguration.getInstance(dbName, cOption, dOption);
 	            dumpSvc.backup(backupConf);
 	        } else if ("RESTORE".equals(action)) {
-	            dumpSvc.restore(backupConf);
+	            RestoreConfiguration restoreConf = RestoreConfiguration.getInstance(dbName, cOption, dOption);
+	            dumpSvc.restore(restoreConf);
 	        } else {
 	        	log.info("invalid action {} : expected BACKUP|RESTORE", action);
 	        	printUsage();
