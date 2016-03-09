@@ -8,6 +8,14 @@ public class RestoreConfiguration {
 	String collectionName = null;
 	String backupFile = null;
 
+	public static RestoreConfiguration getInstance(BackupConfiguration backupConf) {
+		RestoreConfiguration conf = new RestoreConfiguration();
+		conf.dbName = backupConf.getDbName();
+		conf.collectionName = backupConf.getCollectionName();
+		conf.backupFile = backupConf.getAbsoluteBackupName();
+		return conf;
+	}
+
 	public static RestoreConfiguration getInstance(String dbName, String backupFilename) {
 		RestoreConfiguration conf = new RestoreConfiguration();
 		conf.dbName = dbName;
@@ -22,4 +30,5 @@ public class RestoreConfiguration {
 		conf.backupFile = backupFilename;
 		return conf;
 	}
+
 }

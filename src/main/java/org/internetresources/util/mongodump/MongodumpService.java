@@ -1,6 +1,5 @@
 package org.internetresources.util.mongodump;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
@@ -43,24 +42,21 @@ public class MongodumpService {
 		notEmpty(db, "database name is required");
 		String cmd = getHostConfig().getMongoDumpBinAbsolutePath();
 		String collection = backupConf.getCollectionName();
-		String outDir = backupConf.getBackupDirectory();
-		return _backupCmd(cmd,db,collection,outDir);
+		String finalBackupName = backupConf.getAbsoluteBackupName();
+		return _backupCmd(cmd, db, collection, finalBackupName);
 	}
 
-	private String _backupCmd(String cmd, String db, String collection, String outDir) throws RestoreException {
-		log.info("backup cmd:{}, db:{}, collection:{}, out:{}",
-				cmd, db, collection != null ? collection : "(not set)", outDir);
-		
+	private String _backupCmd(String cmd, String db, String collection, String finalBackupName) throws RestoreException {
+		log.info("backup cmd:{}, db:{}, collection:{}, finalZipName:{}",
+				cmd, db, collection != null ? collection : "(not set)", finalBackupName);
 		
 		ProcessBuilder builder;
-		String finalZipName = String.format("%s%s%s.zip", outDir, File.separator, db);
-		String archiveOption = String.format("/archive:%s", finalZipName);
+		String archiveOption = String.format("/archive:%s", finalBackupName);
 		if (collection != null) {
 			builder = new ProcessBuilder(cmd, archiveOption, "--gzip", "--db", db,"--collection", collection);
 		} else {
-			builder = new ProcessBuilder(cmd, archiveOption, "--gzip", "--db", db); // , "--out" ,outDir);
+			builder = new ProcessBuilder(cmd, archiveOption, "--gzip", "--db", db);
 		}
-		// builder.inheritIO(); 
 		
 		try {
 			SpyLogs spyLogs = new SpyLogs();
@@ -76,8 +72,8 @@ public class MongodumpService {
 			process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue == 0) {
-        		log.info("BACKUP created : {}", finalZipName);
-            	return finalZipName;
+        		log.info("BACKUP created : {}", finalBackupName);
+            	return finalBackupName;
             }
             String errorMsg = null;
             if (!spyErrorLogs.hasSpy(errorId)) {

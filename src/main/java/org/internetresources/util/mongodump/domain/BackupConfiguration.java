@@ -1,5 +1,7 @@
 package org.internetresources.util.mongodump.domain;
 
+import java.io.File;
+
 import lombok.Data;
 
 @Data
@@ -10,16 +12,22 @@ public class BackupConfiguration {
         return (OS.indexOf("win") >= 0);
     }
 
+	String backupName = null;
 	String dbName = null;
 	String collectionName = null;
 	String backupDirectory = DEFAULT_BACKUP_DIRECTORY;
 	
 	private BackupConfiguration(){};
 	
-	public static BackupConfiguration getInstance(String dbName) {
+	public static BackupConfiguration getInstance(String dbName, String backupName) {
 		BackupConfiguration conf = new BackupConfiguration();
 		conf.dbName = dbName;
+		conf.backupName = backupName;
 		return conf;
+	}
+
+	public static BackupConfiguration getInstance(String dbName) {
+		return getInstance(dbName, dbName);
 	}
 
 	public static BackupConfiguration getInstance(String dbName, String collectionName, String backupDirectory) {
@@ -29,5 +37,11 @@ public class BackupConfiguration {
 			conf.backupDirectory = backupDirectory;
 		}
 		return conf;
+	}
+
+	public String getAbsoluteBackupName() {
+		String outDir = backupDirectory != null ? backupDirectory : "./";
+		String filename = backupName != null ? backupName : (dbName != null ? dbName : "backup");
+		return String.format("%s%s%s.zip", outDir, File.separator, filename);
 	}
 }

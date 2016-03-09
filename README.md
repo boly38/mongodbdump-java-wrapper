@@ -17,4 +17,4 @@ Goal is to provide to any java application, a simple and light way to backup a M
   -  THEN: fresh database restore done from backup zip file
 
 ### TODO
- - add the way to give a name to the backup
+ - add cloud save/restore feature (ex. a [box.com](https://www.box.com/) directory)
