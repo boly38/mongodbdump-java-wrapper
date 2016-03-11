@@ -1,29 +1,45 @@
 package org.internetresources.util.mongodump;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
 import java.util.Locale;
 
 import org.junit.Assume;
-import org.junit.Test;
 
+import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.http.HttpRequestor;
 import com.dropbox.core.http.StandardHttpRequestor;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.DownloadErrorException;
+import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.UploadErrorException;
 import com.dropbox.core.v2.users.FullAccount;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DropBoxTest {
+public class DropboxService {
 	public static final String APP_NAME = "dropbox/Applications/MongoWrapper";
 	public static final String DROPBOX_TOKEN_KEY = "DROPBOX_TOKEN";
+	
+	private DbxClientV2 dboxClient = null;
+
+	public DropboxService() {
+        _initClient();
+	}
 
 	private String getDropBoxToken() {
 		String token = System.getenv(DROPBOX_TOKEN_KEY);
@@ -36,7 +52,7 @@ public class DropBoxTest {
 		return token;
 	}
 
-	public HttpRequestor getProxy(){
+	private HttpRequestor getProxyRequestor(){
 		String proxyHost = System.getProperty("https.proxyHost", "");
 		if (proxyHost == null || proxyHost.isEmpty()) {
 			return null;
@@ -67,12 +83,13 @@ public class DropBoxTest {
         log.info("use proxy {}:{}", proxyHost, proxyPort);
         return req;
 	}
-
-	@Test
-	public void should_list_box() throws ListFolderErrorException, DbxException {
-        String localeString = Locale.getDefault().toString();
+	private void _initClient() {
+		String localeString = Locale.getDefault().toString();
 	    String token = getDropBoxToken();
-        HttpRequestor requ = getProxy();
+	    if (token == null || token.isEmpty()) {
+	    	return;
+	    }
+        HttpRequestor requ = getProxyRequestor();
 
         DbxRequestConfig config;
 
@@ -82,25 +99,47 @@ public class DropBoxTest {
             config = new DbxRequestConfig(APP_NAME, localeString);
         }
 
-        DbxClientV2 client = new DbxClientV2(config, token);
-
-
-        // Get current account info
-        FullAccount account = client.users().getCurrentAccount();
-        System.out.println(account.getName().getDisplayName());
-
-        // Get files and folder metadata from Dropbox root directory
-        List<Metadata> entries = client.files().listFolder("").getEntries();
-        for (Metadata metadata : entries) {
-            System.out.println(metadata.getPathLower());
-        }
-
-        /* Upload "test.txt" to Dropbox
-        try (InputStream in = new FileInputStream("test.txt")) {
-            FileMetadata metadata = client.files().uploadBuilder("/test.txt")
-                .uploadAndFinish(in);
-        }
-        */
+        dboxClient = new DbxClientV2(config, token);
 	}
 
+	private void assumeAvailable() {
+		if (!isAvailable()) {
+			throw new IllegalStateException("DropBox client is not available");
+		}
+	}
+
+	public boolean isAvailable() {
+		return (dboxClient != null);
+	}
+	
+	public String getAccount() throws DbxException {
+		assumeAvailable();
+	    // Get current account info
+        FullAccount account = dboxClient.users().getCurrentAccount();
+        return account.getName().getDisplayName();
+	}
+
+	public List<Metadata> listFolder(String folderName) throws ListFolderErrorException, DbxException {
+		assumeAvailable();
+		return dboxClient.files().listFolder(folderName).getEntries();
+	}
+
+	public FileMetadata uploadFile(String localFilename, String dboxFilename) throws FileNotFoundException, IOException, UploadErrorException, DbxException {
+		assumeAvailable();
+        try (InputStream in = new FileInputStream(localFilename)) {
+            FileMetadata metadata = dboxClient.files().uploadBuilder(dboxFilename)
+                .uploadAndFinish(in);
+            return metadata;
+        }
+	}
+
+	public String downloadFile(String dboxFilename) throws IOException, DownloadErrorException, DbxException {
+		File tmpFile = File.createTempFile("dropbox-downloaded-file", ".tmp"); 
+		DbxDownloader<FileMetadata> download = dboxClient.files().download(dboxFilename);
+		OutputStream fOut = new FileOutputStream(tmpFile);
+		download.download(fOut );
+		String filePath = tmpFile.getAbsolutePath();
+		fOut.close();
+		return filePath;
+	}
 }
