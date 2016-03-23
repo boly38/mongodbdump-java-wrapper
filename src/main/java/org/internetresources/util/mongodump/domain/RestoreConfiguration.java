@@ -31,4 +31,8 @@ public class RestoreConfiguration {
 		return conf;
 	}
 
+	public String toString() {
+		return String.format("RestoreConfiguration[db:%s %s file:%s]",
+				dbName, collectionName != null ? "coll:"+collectionName : "", backupFile);
+	}
 }

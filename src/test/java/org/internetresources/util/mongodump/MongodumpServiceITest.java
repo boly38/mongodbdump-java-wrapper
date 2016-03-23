@@ -5,6 +5,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import java.io.File;
 
 import org.internetresources.util.mongodump.domain.BackupConfiguration;
+import org.internetresources.util.mongodump.domain.BackupException;
 import org.internetresources.util.mongodump.domain.MongoServerHostConfiguration;
 import org.internetresources.util.mongodump.domain.RestoreConfiguration;
 import org.internetresources.util.mongodump.domain.RestoreException;
@@ -61,9 +62,10 @@ public class MongodumpServiceITest {
 
 	/**
 	 * backup TEST_DATABASE_NAME database into zip file located in tmp directory
+	 * @throws BackupException 
 	 */
 	@Test
-	public void should_backup_database() throws RestoreException {
+	public void should_backup_database() throws BackupException {
 		// GIVEN 
 		// IMPROVEMENT : create dedicated mongo database + content");
 		assumeHostIsReadyForTest();

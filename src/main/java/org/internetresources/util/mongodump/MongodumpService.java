@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 
 import org.internetresources.util.mongodump.domain.BackupConfiguration;
+import org.internetresources.util.mongodump.domain.BackupException;
 import org.internetresources.util.mongodump.domain.MongoServerHostConfiguration;
 import org.internetresources.util.mongodump.domain.RestoreConfiguration;
 import org.internetresources.util.mongodump.domain.RestoreException;
@@ -37,16 +38,16 @@ public class MongodumpService {
 		}
 	}
 
-	public synchronized String backup(BackupConfiguration backupConf) throws RestoreException {
+	public synchronized String backup(BackupConfiguration backupConf) throws BackupException {
 		String db = backupConf != null ? backupConf.getDbName() : null;
 		notEmpty(db, "database name is required");
 		String cmd = getHostConfig().getMongoDumpBinAbsolutePath();
-		String collection = backupConf.getCollectionName();
-		String finalBackupName = backupConf.getAbsoluteBackupName();
+		String collection = backupConf != null ? backupConf.getCollectionName() : null;
+		String finalBackupName = backupConf != null ? backupConf.getAbsoluteBackupName() : null;
 		return _backupCmd(cmd, db, collection, finalBackupName);
 	}
 
-	private String _backupCmd(String cmd, String db, String collection, String finalBackupName) throws RestoreException {
+	private String _backupCmd(String cmd, String db, String collection, String finalBackupName) throws BackupException {
 		log.info("backup cmd:{}, db:{}, collection:{}, finalZipName:{}",
 				cmd, db, collection != null ? collection : "(not set)", finalBackupName);
 		
@@ -79,15 +80,15 @@ public class MongodumpService {
             if (!spyErrorLogs.hasSpy(errorId)) {
             	errorMsg = spyErrorLogs.getRecorderdSpy(errorId);
             }
-            throw new RestoreException(exitValue, errorMsg);
+            throw new BackupException(exitValue, errorMsg);
 		} catch (IOException e) {
 			String errMsg = String.format("Error during the backup of '%s' : %s", db, e.getMessage());
 			log.error(errMsg, e);
-			throw new RestoreException(errMsg);
+			throw new BackupException(errMsg);
 		} catch (InterruptedException e) {
 			String errMsg = String.format("Interruption during the backup of '{}' : {}", db, e.getMessage());
 			log.error(errMsg, e);
-			throw new RestoreException(errMsg);
+			throw new BackupException(errMsg);
 		}
 
 	}
@@ -96,8 +97,8 @@ public class MongodumpService {
 		String db = restoreConf != null ? restoreConf.getDbName() : null;
 		notEmpty(db, "database name is required");
 		String cmd = getHostConfig().getMongoRestoreBinAbsolutePath();
-		String collection = restoreConf.getCollectionName();
-		String backupFile = restoreConf.getBackupFile();
+		String collection = restoreConf != null ? restoreConf.getCollectionName() : null;
+		String backupFile = restoreConf != null ? restoreConf.getBackupFile() : null;
 		_restoreCmd(cmd,db,collection,backupFile);
 	}
 

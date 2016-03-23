@@ -10,6 +10,10 @@ public class RestoreException extends Exception {
 		super(errMsg);
 	}
 
+	public RestoreException(String errMsg, Throwable e) {
+		super(errMsg, e);
+	}
+
 	private static String exceptionMessage(int existStatus, String errorMessage) {
 		String errorDetails = "";
 		if (errorMessage != null) {
@@ -21,6 +25,5 @@ public class RestoreException extends Exception {
 	public RestoreException(int existStatus, String errorMessage) {
 		super(exceptionMessage(existStatus, errorMessage));
 	}
-
 
 }

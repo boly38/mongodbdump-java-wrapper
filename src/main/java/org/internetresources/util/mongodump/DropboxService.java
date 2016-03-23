@@ -12,8 +12,6 @@ import java.net.Proxy;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.Assume;
-
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
@@ -32,8 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DropboxService {
-	public static final String APP_NAME = "dropbox/Applications/MongoWrapper";
+	public static final String DEFAULT_APP_NAME = "dropbox/Applications/MongoWrapper";
+
 	public static final String DROPBOX_TOKEN_KEY = "DROPBOX_TOKEN";
+	public static final String DROPBOX_APPLICATION_KEY = "DROPBOX_APPLICATION";
 	
 	private DbxClientV2 dboxClient = null;
 
@@ -41,15 +41,27 @@ public class DropboxService {
         _initClient();
 	}
 
+	private void warnUsage() {
+    	String notTokenMsg = String.format("no dropbox token defined, env:%s is not set", DROPBOX_TOKEN_KEY);
+		log.warn(notTokenMsg);
+	}
+	
 	private String getDropBoxToken() {
 		String token = System.getenv(DROPBOX_TOKEN_KEY);
 	    boolean tokenIsSet = token != null && !token.isEmpty();
-    	String notTokenMsg = String.format("no dropbox token defined, env:%s is not set", DROPBOX_TOKEN_KEY);
 	    if (!tokenIsSet) {
-			log.warn(notTokenMsg);
+	    	return null;
 	    }
-		Assume.assumeTrue(notTokenMsg, tokenIsSet);
 		return token;
+	}
+
+	private String getDropBoxAppName() {
+		String appName = System.getenv(DROPBOX_APPLICATION_KEY);
+	    boolean appIsSet = appName != null && !appName.isEmpty();
+	    if (!appIsSet) {
+	    	return DEFAULT_APP_NAME;
+	    }
+		return appName;
 	}
 
 	private HttpRequestor getProxyRequestor(){
@@ -85,6 +97,7 @@ public class DropboxService {
 	}
 	private void _initClient() {
 		String localeString = Locale.getDefault().toString();
+		String appName = getDropBoxAppName();
 	    String token = getDropBoxToken();
 	    if (token == null || token.isEmpty()) {
 	    	return;
@@ -94,16 +107,18 @@ public class DropboxService {
         DbxRequestConfig config;
 
         if(requ!=null) {
-            config = new DbxRequestConfig(APP_NAME, localeString,requ);
+            config = new DbxRequestConfig(appName, localeString,requ);
         } else {
-            config = new DbxRequestConfig(APP_NAME, localeString);
+            config = new DbxRequestConfig(appName, localeString);
         }
 
         dboxClient = new DbxClientV2(config, token);
+        log.debug("connected to dropbox application '{}'", appName);
 	}
 
-	private void assumeAvailable() {
+	public void assumeAvailable() {
 		if (!isAvailable()) {
+			warnUsage();
 			throw new IllegalStateException("DropBox client is not available");
 		}
 	}

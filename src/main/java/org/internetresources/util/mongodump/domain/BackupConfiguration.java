@@ -44,4 +44,9 @@ public class BackupConfiguration {
 		String filename = backupName != null ? backupName : (dbName != null ? dbName : "backup");
 		return String.format("%s%s%s.zip", outDir, File.separator, filename);
 	}
+
+	public String toString() {
+		return String.format("BackupConfiguration[db:%s %s dir:%s file:%s.zip]",
+				dbName, collectionName != null ? "coll:"+collectionName : "", backupDirectory, backupName);
+	}
 }
