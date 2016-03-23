@@ -3,20 +3,28 @@ A simple java wrapper for mongodb backup commands : mongodump & mongorestore
 
 ## Goal
 Goal is to provide to any java application, a simple and light way to backup a Mongo database:
-- first locally through zip file on the local storage
-- (planned) second remotely using custom plugin (example: dropbox.com plugin to store backup zip file on the cloud : a remote secure dropbox directory)
+- backup/restore locally through zip file on the local storage
+- backup/restore remotely using dropbox.com API - store backup zip file on the cloud : a remote secure dropbox directory
 
 ## HowTo backup/restore database to/from DropBox 
 
-- subscribe and login onto dropbox.com
-- create a [new dropbox application](https://www.dropbox.com/developers/apps/create) for your backup (example : MongoWrapper)
+- subscribe and login onto [dropbox.com](https://www.dropbox.com/)
+- create your [dropbox application](https://www.dropbox.com/developers/apps/create) for your backup (example : MongoWrapper)
 - configure your environment to use dropbox service: 
--- (mandatory) dropbox [access token of your app](https://www.dropbox.com/developers/apps/info/) 
+-- (mandatory) dropbox [access TOKEN of your app](https://www.dropbox.com/developers/apps/info/) 
 -- an application name
 
 example :
-DROPBOX_TOKEN="EMYWONDERFULLTOKEN_HERE_FROM_DROPBOX_APP_INFOH"
+DROPBOX_TOKEN="MYWONDERFULLTOKEN_HERE_FROM_DROPBOX_APP_INFO"
 DROPBOX_APPLICATION="MyWrapper"
+
+
+example of backup:
+		MongoServerHostConfiguration hostConf = new MongoServerHostConfiguration();
+		MongodumpService mService = MongodumpService.getInstance(hostConf);
+		BackupConfiguration backupConf = BackupConfiguration.getInstance("myDatabase", "myBackup");
+		String backupLocalZipFile = mService.backup(backupConf);
+
 
 ## Integration tests 
 Integration tests are good way to know how to use this library. Each main feature is described with a dedicated integration test.
@@ -42,6 +50,7 @@ Integration tests are good way to know how to use this library. Each main featur
   -  THEN: fresh database restore done from downloaded backup zip file
 
 ### Contributions
+
 Contributions are welcome through feature branch and pull request. 
 
 If you encounter issue, please provide details on a new [ticket](https://github.com/boly38/mongodbdump-java-wrapper/issues).
