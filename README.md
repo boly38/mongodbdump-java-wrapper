@@ -17,6 +17,7 @@ Goal is to provide to any java application, a simple and light way to backup a M
 
 
 example of backup:
+
 		MongoServerHostConfiguration hostConf = new MongoServerHostConfiguration();
 		MongodumpService mService = MongodumpService.getInstance(hostConf);
 		BackupConfiguration backupConf = BackupConfiguration.getInstance("myDatabase", "myBackup");
