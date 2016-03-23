@@ -10,13 +10,10 @@ Goal is to provide to any java application, a simple and light way to backup a M
 
 - subscribe and login onto [dropbox.com](https://www.dropbox.com/)
 - create your [dropbox application](https://www.dropbox.com/developers/apps/create) for your backup (example : MongoWrapper)
-- configure your environment to use dropbox service: 
--- (mandatory) dropbox [access TOKEN of your app](https://www.dropbox.com/developers/apps/info/) 
--- an application name
+- configure your environment to use dropbox service: (mandatory) a dropbox [access TOKEN of your app](https://www.dropbox.com/developers/apps/info/) plus an optional application name. Example :
 
-example :
-DROPBOX_TOKEN="MYWONDERFULLTOKEN_HERE_FROM_DROPBOX_APP_INFO"
-DROPBOX_APPLICATION="MyWrapper"
+    DROPBOX_TOKEN="MYWONDERFULLTOKEN_HERE_FROM_DROPBOX_APP_INFO"
+    DROPBOX_APPLICATION="MyWrapper"
 
 
 example of backup:
