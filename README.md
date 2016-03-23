@@ -54,5 +54,5 @@ Contributions are welcome through feature branch and pull request.
 If you encounter issue, please provide details on a new [ticket](https://github.com/boly38/mongodbdump-java-wrapper/issues).
 
 ### TODO list
- - add cloud save/restore feature (ex. a [dropbox.com](https://www.dropbox.com/) directory)
+
  - add the way to auto-detect mongo executables on an openshift context (at runtime on an openshift gear)
