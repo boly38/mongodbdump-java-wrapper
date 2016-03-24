@@ -4,13 +4,21 @@
 	<groupId>com.github.boly38</groupId>
 	<artifactId>mongodbdump-java-wrapper</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>mongodbdump-java-wrapper</name>
+	<name>com.github.boly38:mongodbdump-java-wrapper</name>
 
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
 
 	<developers>
 		<developer>
 			<name>Brice VANDEPUTTE</name>
 			<email>boly38@gmail.com</email>
+			<organization>github</organization>
+			<organizationUrl>https://github.com/boly38/</organizationUrl>
 		</developer>
 	</developers>
 
