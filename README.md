@@ -55,5 +55,6 @@ If you encounter issue, please provide details on a new [ticket](https://github.
 
 ### TODO list
 
- - deploy on central repository [sonatype project ticket](https://issues.sonatype.org/browse/OSSRH-21400)
+ - deploy on central repository [sonatype project ticket](https://issues.sonatype.org/browse/OSSRH-21400) : [requirements](http://central.sonatype.org/pages/requirements.html)
+ 
  - add the way to auto-detect mongo executables on an openshift context (at runtime on an openshift gear)

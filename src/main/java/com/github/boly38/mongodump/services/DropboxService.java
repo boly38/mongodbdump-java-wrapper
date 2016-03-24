@@ -134,11 +134,28 @@ public class DropboxService {
         return account.getName().getDisplayName();
 	}
 
+	/**
+	 * list dropbox folder
+	 * @param folderName
+	 * @return
+	 * @throws ListFolderErrorException
+	 * @throws DbxException
+	 */
 	public List<Metadata> listFolder(String folderName) throws ListFolderErrorException, DbxException {
 		assumeAvailable();
 		return dboxClient.files().listFolder(folderName).getEntries();
 	}
 
+	/**
+	 * upload local file to dropbox folder
+	 * @param localFilename
+	 * @param dboxFilename
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws UploadErrorException
+	 * @throws DbxException
+	 */
 	public FileMetadata uploadFile(String localFilename, String dboxFilename) throws FileNotFoundException, IOException, UploadErrorException, DbxException {
 		assumeAvailable();
         try (InputStream in = new FileInputStream(localFilename)) {
@@ -148,6 +165,14 @@ public class DropboxService {
         }
 	}
 
+	/**
+	 * download dropbox file locally
+	 * @param dboxFilename
+	 * @return
+	 * @throws IOException
+	 * @throws DownloadErrorException
+	 * @throws DbxException
+	 */
 	public String downloadFile(String dboxFilename) throws IOException, DownloadErrorException, DbxException {
 		File tmpFile = File.createTempFile("dropbox-downloaded-file", ".tmp"); 
 		DbxDownloader<FileMetadata> download = dboxClient.files().download(dboxFilename);

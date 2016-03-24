@@ -21,12 +21,19 @@
 			<organizationUrl>https://github.com/boly38/</organizationUrl>
 		</developer>
 	</developers>
-	
+
 	<scm>
-  		<connection>scm:git:git@github.com:boly38/mongodbdump-java-wrapper.git</connection>
-  		<developerConnection>scm:git:git@github.com:jboly38/mongodbdump-java-wrapper.git</developerConnection>
-  		<url>git@github.com:boly38/mongodbdump-java-wrapper.git</url>
+		<connection>scm:git:git@github.com:boly38/mongodbdump-java-wrapper.git</connection>
+		<developerConnection>scm:git:git@github.com:jboly38/mongodbdump-java-wrapper.git</developerConnection>
+		<url>git@github.com:boly38/mongodbdump-java-wrapper.git</url>
 	</scm>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<properties>
 		<!--General project configuration -->
@@ -36,10 +43,16 @@
 		<!-- build info -->
 		<maven.build.timestamp.format>yyyyMMdd_HHmm</maven.build.timestamp.format>
 		<build.version>${maven.build.timestamp}</build.version>
+		<buildVersion>${maven.build.timestamp}</buildVersion>
+		<source.level>1.7</source.level>
 
 		<mainclass>org.internetresources.util.Main</mainclass>
 		<finalName>mongodbdump-java-wrapper</finalName>
 
+		<!-- ~~~~~~~~~~~~~~~~~~~~~ -->
+		<!-- dependencies versions -->
+		<!-- ~~~~~~~~~~~~~~~~~~~~~ -->
+		<maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
 		<junit.version>4.12</junit.version>
 	</properties>
 	<dependencyManagement>
@@ -165,6 +178,68 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${source.level}</source>
+					<target>${source.level}</target>
+				</configuration>
+			</plugin>
+			<!-- SONATYPE http://central.sonatype.org/pages/apache-maven.html -->
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>

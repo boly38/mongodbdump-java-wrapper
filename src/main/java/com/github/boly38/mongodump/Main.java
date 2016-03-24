@@ -48,8 +48,10 @@ public class Main {
         return parser.parse(OPTIONS, args);
     }
 
-
-
+	/**
+	 * main class (console entry point)
+	 * @param args
+	 */
     public static void main(String[] args) {
         CommandLine cmd;
         try {

@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.fest.assertions.api.Assertions;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.dropbox.core.DbxException;
@@ -22,6 +23,7 @@ import com.github.boly38.mongodump.services.DropboxService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Ignore("only manual tests : dropbox env required")
 public class DropboxServiceITest {
 
 	private DropboxService assumeDroptboxRequirement() {

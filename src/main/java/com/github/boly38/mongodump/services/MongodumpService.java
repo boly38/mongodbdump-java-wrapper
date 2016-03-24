@@ -26,6 +26,11 @@ public class MongodumpService {
 
 	private MongodumpService(){}
 	
+	/**
+	 * get mongo dump service instance
+	 * @param hostConf current host configuration
+	 * @return
+	 */
 	public static MongodumpService getInstance(MongoServerHostConfiguration hostConf) {
 		MongodumpService svc = new MongodumpService();
 		svc.setHostConfig(hostConf);
@@ -38,6 +43,12 @@ public class MongodumpService {
 		}
 	}
 
+	/**
+	 * mongodump mongodb according to backupConf
+	 * @param backupConf backup configuration
+	 * @return
+	 * @throws BackupException
+	 */
 	public synchronized String backup(BackupConfiguration backupConf) throws BackupException {
 		String db = backupConf != null ? backupConf.getDbName() : null;
 		notEmpty(db, "database name is required");
@@ -93,6 +104,11 @@ public class MongodumpService {
 
 	}
 
+	/**
+	 * mongorestore a given backup according to restore configuration
+	 * @param restoreConf restore coniguration
+	 * @throws RestoreException
+	 */
 	public synchronized void restore(RestoreConfiguration restoreConf) throws RestoreException {
 		String db = restoreConf != null ? restoreConf.getDbName() : null;
 		notEmpty(db, "database name is required");

@@ -1,6 +1,7 @@
 package com.github.boly38.mongodump.services;
 
 import org.fest.assertions.api.Assertions;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.dropbox.core.v2.files.FileMetadata;
@@ -13,6 +14,7 @@ import com.github.boly38.mongodump.services.DropboxMongoBackupService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Ignore("only manual tests : local mongodb required")
 public class DropboxMongoBackupServiceITest {
 	final String TEST_DATABASE_NAME = "myDB";
 	final String TEST_BACKUP_NAME   = "myBackup";

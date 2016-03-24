@@ -5,6 +5,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import java.io.File;
 
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.github.boly38.mongodump.domain.BackupConfiguration;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
+@Ignore("only manual tests : local mongodb required")
 public class MongodumpServiceITest {
 
 	final String TEST_DATABASE_NAME = "myDB";
