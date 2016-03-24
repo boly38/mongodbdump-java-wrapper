@@ -47,6 +47,13 @@ Integration tests are good way to know how to use this library. Each main featur
   -  WHEN: RESTORE action
   -  THEN: fresh database restore done from downloaded backup zip file
 
+### Maven
+
+This project is hosted by Sonatype.org : [oss.sonatype.org](https://oss.sonatype.org/#nexus-search;quick~boly38)
+
+ - [sonatype project ticket](https://issues.sonatype.org/browse/OSSRH-21400)
+ - [sonatype requirements](http://central.sonatype.org/pages/requirements.html)
+  
 ### Contributions
 
 Contributions are welcome through feature branch and pull request. 
@@ -55,6 +62,4 @@ If you encounter issue, please provide details on a new [ticket](https://github.
 
 ### TODO list
 
- - deploy on central repository [sonatype project ticket](https://issues.sonatype.org/browse/OSSRH-21400) : [requirements](http://central.sonatype.org/pages/requirements.html)
- 
  - add the way to auto-detect mongo executables on an openshift context (at runtime on an openshift gear)
