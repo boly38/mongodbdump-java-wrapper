@@ -1,4 +1,4 @@
-package org.internetresources.util.mongodump.domain;
+package com.github.boly38.mongodump.domain;
 
 import java.util.HashMap;
 import java.util.Map;

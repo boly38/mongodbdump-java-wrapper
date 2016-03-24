@@ -1,4 +1,4 @@
-package org.internetresources.util;
+package com.github.boly38.mongodump;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -11,10 +11,11 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.internetresources.util.mongodump.MongodumpService;
-import org.internetresources.util.mongodump.domain.BackupConfiguration;
-import org.internetresources.util.mongodump.domain.MongoServerHostConfiguration;
-import org.internetresources.util.mongodump.domain.RestoreConfiguration;
+
+import com.github.boly38.mongodump.domain.BackupConfiguration;
+import com.github.boly38.mongodump.domain.MongoServerHostConfiguration;
+import com.github.boly38.mongodump.domain.RestoreConfiguration;
+import com.github.boly38.mongodump.services.MongodumpService;
 
 import lombok.extern.slf4j.Slf4j;
 

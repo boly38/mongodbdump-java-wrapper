@@ -1,16 +1,18 @@
-package org.internetresources.util.mongodump;
+package com.github.boly38.mongodump.services;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.File;
 
-import org.internetresources.util.mongodump.domain.BackupConfiguration;
-import org.internetresources.util.mongodump.domain.BackupException;
-import org.internetresources.util.mongodump.domain.MongoServerHostConfiguration;
-import org.internetresources.util.mongodump.domain.RestoreConfiguration;
-import org.internetresources.util.mongodump.domain.RestoreException;
 import org.junit.Assume;
 import org.junit.Test;
+
+import com.github.boly38.mongodump.domain.BackupConfiguration;
+import com.github.boly38.mongodump.domain.BackupException;
+import com.github.boly38.mongodump.domain.MongoServerHostConfiguration;
+import com.github.boly38.mongodump.domain.RestoreConfiguration;
+import com.github.boly38.mongodump.domain.RestoreException;
+import com.github.boly38.mongodump.services.MongodumpService;
 
 import lombok.extern.slf4j.Slf4j;
 

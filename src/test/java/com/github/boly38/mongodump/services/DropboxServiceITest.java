@@ -1,4 +1,4 @@
-package org.internetresources.util.mongodump;
+package com.github.boly38.mongodump.services;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,6 +17,7 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.Metadata;
+import com.github.boly38.mongodump.services.DropboxService;
 
 import lombok.extern.slf4j.Slf4j;
 

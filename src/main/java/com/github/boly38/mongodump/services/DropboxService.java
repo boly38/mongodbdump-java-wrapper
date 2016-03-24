@@ -1,4 +1,4 @@
-package org.internetresources.util.mongodump;
+package com.github.boly38.mongodump.services;
 
 import java.io.File;
 import java.io.FileInputStream;

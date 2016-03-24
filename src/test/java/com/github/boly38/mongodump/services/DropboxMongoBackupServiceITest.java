@@ -1,13 +1,14 @@
-package org.internetresources.util.mongodump;
+package com.github.boly38.mongodump.services;
 
 import org.fest.assertions.api.Assertions;
-import org.internetresources.util.mongodump.domain.BackupConfiguration;
-import org.internetresources.util.mongodump.domain.BackupException;
-import org.internetresources.util.mongodump.domain.MongoServerHostConfiguration;
-import org.internetresources.util.mongodump.domain.RestoreException;
 import org.junit.Test;
 
 import com.dropbox.core.v2.files.FileMetadata;
+import com.github.boly38.mongodump.domain.BackupConfiguration;
+import com.github.boly38.mongodump.domain.BackupException;
+import com.github.boly38.mongodump.domain.MongoServerHostConfiguration;
+import com.github.boly38.mongodump.domain.RestoreException;
+import com.github.boly38.mongodump.services.DropboxMongoBackupService;
 
 import lombok.extern.slf4j.Slf4j;
 
