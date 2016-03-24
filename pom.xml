@@ -21,6 +21,12 @@
 			<organizationUrl>https://github.com/boly38/</organizationUrl>
 		</developer>
 	</developers>
+	
+	<scm>
+  		<connection>scm:git:git@github.com:boly38/mongodbdump-java-wrapper.git</connection>
+  		<developerConnection>scm:git:git@github.com:jboly38/mongodbdump-java-wrapper.git</developerConnection>
+  		<url>git@github.com:boly38/mongodbdump-java-wrapper.git</url>
+	</scm>
 
 	<properties>
 		<!--General project configuration -->
