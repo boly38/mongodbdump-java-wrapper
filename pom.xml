@@ -24,7 +24,7 @@
 
 	<scm>
 		<connection>scm:git:git@github.com:boly38/mongodbdump-java-wrapper.git</connection>
-		<developerConnection>scm:git:git@github.com:jboly38/mongodbdump-java-wrapper.git</developerConnection>
+		<developerConnection>scm:git:git@github.com:boly38/mongodbdump-java-wrapper.git</developerConnection>
 		<url>git@github.com:boly38/mongodbdump-java-wrapper.git</url>
 	</scm>
 
