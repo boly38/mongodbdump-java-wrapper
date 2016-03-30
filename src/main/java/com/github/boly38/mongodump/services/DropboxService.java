@@ -137,7 +137,7 @@ public class DropboxService {
 	/**
 	 * list dropbox folder
 	 * @param folderName
-	 * @return
+	 * @return target folder list of meta data
 	 * @throws ListFolderErrorException
 	 * @throws DbxException
 	 */
@@ -150,7 +150,7 @@ public class DropboxService {
 	 * upload local file to dropbox folder
 	 * @param localFilename
 	 * @param dboxFilename
-	 * @return
+	 * @return uploaded file meta data
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws UploadErrorException
@@ -168,7 +168,7 @@ public class DropboxService {
 	/**
 	 * download dropbox file locally
 	 * @param dboxFilename
-	 * @return
+	 * @return downloaded local temp file
 	 * @throws IOException
 	 * @throws DownloadErrorException
 	 * @throws DbxException

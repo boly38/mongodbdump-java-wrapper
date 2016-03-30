@@ -29,7 +29,7 @@ public class MongodumpService {
 	/**
 	 * get mongo dump service instance
 	 * @param hostConf current host configuration
-	 * @return
+	 * @return mongoservice
 	 */
 	public static MongodumpService getInstance(MongoServerHostConfiguration hostConf) {
 		MongodumpService svc = new MongodumpService();
@@ -46,7 +46,7 @@ public class MongodumpService {
 	/**
 	 * mongodump mongodb according to backupConf
 	 * @param backupConf backup configuration
-	 * @return
+	 * @return just created backup local file
 	 * @throws BackupException
 	 */
 	public synchronized String backup(BackupConfiguration backupConf) throws BackupException {
