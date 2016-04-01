@@ -1,15 +1,16 @@
-package com.github.boly38.mongodump.services;
+package com.github.boly38.mongodump.services.impl;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
 import com.github.boly38.mongodump.domain.BackupConfiguration;
 import com.github.boly38.mongodump.domain.BackupException;
-import com.github.boly38.mongodump.domain.MongoServerHostConfiguration;
 import com.github.boly38.mongodump.domain.RestoreConfiguration;
 import com.github.boly38.mongodump.domain.RestoreException;
-import com.github.boly38.mongodump.domain.SpyLogs;
-import com.github.boly38.mongodump.domain.StreamPrinter;
+import com.github.boly38.mongodump.domain.hostconf.IMongoServerHostConfiguration;
+import com.github.boly38.mongodump.domain.logger.SpyLogs;
+import com.github.boly38.mongodump.domain.logger.StreamPrinter;
+import com.github.boly38.mongodump.services.contract.MongodumpService;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -21,20 +22,15 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Data
-public class MongodumpService {
-	private MongoServerHostConfiguration hostConfig;
+public class MongodumpServiceImpl implements MongodumpService {
+	private final IMongoServerHostConfiguration hostConfig;
 
-	private MongodumpService(){}
-	
 	/**
-	 * get mongo dump service instance
-	 * @param hostConf current host configuration
-	 * @return mongoservice
+	 * Constructor
+	 * @param hostConfcurrent host configuration
 	 */
-	public static MongodumpService getInstance(MongoServerHostConfiguration hostConf) {
-		MongodumpService svc = new MongodumpService();
-		svc.setHostConfig(hostConf);
-		return svc;
+	public MongodumpServiceImpl(IMongoServerHostConfiguration hostConf) {
+		this.hostConfig = hostConf;
 	}
 	
 	private void notEmpty(String val, String error) {

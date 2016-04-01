@@ -7,9 +7,9 @@ import org.junit.Test;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.github.boly38.mongodump.domain.BackupConfiguration;
 import com.github.boly38.mongodump.domain.BackupException;
-import com.github.boly38.mongodump.domain.MongoServerHostConfiguration;
 import com.github.boly38.mongodump.domain.RestoreException;
-import com.github.boly38.mongodump.services.DropboxMongoBackupService;
+import com.github.boly38.mongodump.domain.hostconf.MongoServerDefaultHostConfiguration;
+import com.github.boly38.mongodump.services.impl.DropboxMongoBackupServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +19,7 @@ public class DropboxMongoBackupServiceITest {
 	final String TEST_DATABASE_NAME = "myDB";
 	final String TEST_BACKUP_NAME   = "myBackup";
 
-	private MongoServerHostConfiguration hostConf = new MongoServerHostConfiguration();
+	private MongoServerDefaultHostConfiguration hostConf = new MongoServerDefaultHostConfiguration();
 	
 	private BackupConfiguration getBackupConfiguration() {
 		return BackupConfiguration.getInstance(TEST_DATABASE_NAME, TEST_BACKUP_NAME);
@@ -28,7 +28,7 @@ public class DropboxMongoBackupServiceITest {
 	@Test
 	public void should_backup() throws BackupException {
 		// GIVEN
-		DropboxMongoBackupService dbmSvc = DropboxMongoBackupService.getInstance(hostConf);
+		DropboxMongoBackupServiceImpl dbmSvc = new DropboxMongoBackupServiceImpl(hostConf);
 		BackupConfiguration backupConf = getBackupConfiguration();
 		// WHEN
 		FileMetadata backupFile = dbmSvc.backup(backupConf);
@@ -41,7 +41,7 @@ public class DropboxMongoBackupServiceITest {
 	@Test
 	public void should_restore() throws RestoreException {
 		// GIVEN
-		DropboxMongoBackupService dbmSvc = DropboxMongoBackupService.getInstance(hostConf);
+		DropboxMongoBackupServiceImpl dbmSvc = new DropboxMongoBackupServiceImpl(hostConf);
 		log.info("restore from : {}", TEST_BACKUP_NAME);		
 		// WHEN
 		dbmSvc.restore(TEST_DATABASE_NAME, null, TEST_BACKUP_NAME);

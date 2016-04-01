@@ -2,15 +2,15 @@ package com.github.boly38.mongodump.domain;
 
 import java.io.File;
 
+import com.github.boly38.mongodump.services.helpers.HostInfo;
+
 import lombok.Data;
 
 @Data
 public class BackupConfiguration {
-	private static String OS = System.getProperty("os.name").toLowerCase();
-	public static final String DEFAULT_BACKUP_DIRECTORY = isWindows() ? "C:\\TMP\\mongoBackup" : "/tmp/mongoBackup";
-    public static boolean isWindows() {
-        return (OS.indexOf("win") >= 0);
-    }
+	public static final String DEFAULT_BACKUP_DIRECTORY = 
+			HostInfo.isWindows() ? "C:\\TMP\\mongoBackup"
+					             : "/tmp/mongoBackup";
 
 	String backupName = null;
 	String dbName = null;

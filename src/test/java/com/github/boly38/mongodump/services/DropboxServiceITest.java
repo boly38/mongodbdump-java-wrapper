@@ -18,7 +18,7 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.Metadata;
-import com.github.boly38.mongodump.services.DropboxService;
+import com.github.boly38.mongodump.services.impl.DropboxServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,8 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 @Ignore("only manual tests : dropbox env required")
 public class DropboxServiceITest {
 
-	private DropboxService assumeDroptboxRequirement() {
-		DropboxService dboxSvc = new DropboxService();
+	private DropboxServiceImpl assumeDroptboxRequirement() {
+		DropboxServiceImpl dboxSvc = new DropboxServiceImpl();
 		Assume.assumeTrue(dboxSvc.isAvailable());
 		return dboxSvc;
 	}
@@ -40,7 +40,7 @@ public class DropboxServiceITest {
 
 	private void should_list_directory(String dirName, int dirFileCount) throws ListFolderErrorException, DbxException {
 		// GIVEN
-		DropboxService dboxSvc = assumeDroptboxRequirement();
+		DropboxServiceImpl dboxSvc = assumeDroptboxRequirement();
 		// WHEN
 		List<Metadata> listFolder = dboxSvc.listFolder(dirName);
 		// THEN
@@ -66,7 +66,7 @@ public class DropboxServiceITest {
 	
 	public void should_upload_file() throws ListFolderErrorException, DbxException, FileNotFoundException, IOException, URISyntaxException {
 		// GIVEN
-		DropboxService dboxSvc = assumeDroptboxRequirement();
+		DropboxServiceImpl dboxSvc = assumeDroptboxRequirement();
 		String imagePath = getTestImagePath();
 		
 		// WHEN
@@ -80,7 +80,7 @@ public class DropboxServiceITest {
 
 	public void should_download_file() throws ListFolderErrorException, DbxException, FileNotFoundException, IOException, URISyntaxException {
 		// GIVEN
-		DropboxService dboxSvc = assumeDroptboxRequirement();
+		DropboxServiceImpl dboxSvc = assumeDroptboxRequirement();
 		String imageOriginPath = getTestImagePath();
 		File imageOrigin = new File(imageOriginPath);
 	

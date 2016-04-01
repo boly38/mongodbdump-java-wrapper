@@ -1,4 +1,4 @@
-package com.github.boly38.mongodump.domain;
+package com.github.boly38.mongodump.domain.logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;

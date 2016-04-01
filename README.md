@@ -6,8 +6,18 @@ Goal is to provide to any java application, a simple and light way to backup a M
 - backup/restore locally through zip file on the local storage
 - backup/restore remotely using dropbox.com API - store backup zip file on the cloud : a remote secure dropbox directory
 
+## GowTo setup maven dependency
+Add in your pom
+
+			<dependency>
+				<groupId>com.github.boly38</groupId>
+				<artifactId>mongodbdump-java-wrapper</artifactId>
+				<version>1.4</version>
+			</dependency>
+
 ## HowTo use from command line
-Under bash-like console, you could execute wrapper.sh. Otherwise, launch the following command:
+Under bash-like console, you could execute `_wrapper.sh`.
+Otherwise, launch the following command:
 
     java -Dlog4j.configuration=file:log4j.properties -jar target/mongodbdump-java-wrapper-1.4.jar -h
 

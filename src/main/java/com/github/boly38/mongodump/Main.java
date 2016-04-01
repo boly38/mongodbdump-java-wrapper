@@ -7,15 +7,17 @@ import java.security.InvalidParameterException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 import com.github.boly38.mongodump.domain.BackupConfiguration;
-import com.github.boly38.mongodump.domain.MongoServerHostConfiguration;
 import com.github.boly38.mongodump.domain.RestoreConfiguration;
-import com.github.boly38.mongodump.services.MongodumpService;
+import com.github.boly38.mongodump.domain.hostconf.IMongoServerHostConfiguration;
+import com.github.boly38.mongodump.domain.hostconf.MongoServerDefaultHostConfiguration;
+import com.github.boly38.mongodump.services.impl.MongodumpServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,17 +38,24 @@ public class Main {
         log.info(msg);
     }
 
-    @SuppressWarnings("static-access")
     static CommandLine initCommandLineParser(String[] args)
             throws ParseException {
         CommandLineParser parser = new PosixParser();
-        OPTIONS.addOption(OptionBuilder.withArgName("Help").create("h"));
-        OPTIONS.addOption(OptionBuilder.withArgName("Backup directory  (default C:\\TMP\\mongoBackup or /tmp/mongoBackup)").hasArg().create("d"));
-        OPTIONS.addOption(OptionBuilder.withArgName("Database name **required**").hasArg().create("n"));
-        OPTIONS.addOption(OptionBuilder.withArgName("Collection name (optional)").hasArg().create("c"));
-        OPTIONS.addOption(OptionBuilder.withArgName("action 'BACKUP' or 'RESTORE' (default: BACKUP)").hasArg().create("a"));
-        return parser.parse(OPTIONS, args);
+        initArgOption(false, "Help", "h");
+        initArgOption(false, "Backup directory : local backup firectory. (default C:\\TMP\\mongoBackup or /tmp/mongoBackup)", "d");
+        initArgOption(false, "Database name (required)", "n");
+        initArgOption(false, "Collection name (optional)", "c");
+        initArgOption(false, "action 'BACKUP' or 'RESTORE' (default: BACKUP)", "a");
+        CommandLine rez = parser.parse(OPTIONS, args);
+        return rez;
     }
+	private static void initArgOption(boolean required, String optionName, String optionArg) {
+		OptionBuilder.withArgName(optionName);
+		OptionBuilder.isRequired(required);
+		OptionBuilder.hasArg();
+		Option opt = OptionBuilder.create(optionArg);
+		OPTIONS.addOption(opt);
+	}
 
 	/**
 	 * main class (console entry point)
@@ -65,7 +74,7 @@ public class Main {
             printUsage();
             return;
         }
-        MongoServerHostConfiguration hostConf = new MongoServerHostConfiguration();
+        IMongoServerHostConfiguration hostConf = new MongoServerDefaultHostConfiguration();
         String dbName = null;
 
         if (cmd.hasOption("n")) { // db name (required)
@@ -93,7 +102,7 @@ public class Main {
             action = argVal;
         }
         try {
-			MongodumpService dumpSvc = MongodumpService.getInstance(hostConf);
+			MongodumpServiceImpl dumpSvc = new MongodumpServiceImpl(hostConf);
 	        if ("BACKUP".equals(action)) {
 	            BackupConfiguration backupConf = BackupConfiguration.getInstance(dbName, cOption, dOption);
 	            dumpSvc.backup(backupConf);

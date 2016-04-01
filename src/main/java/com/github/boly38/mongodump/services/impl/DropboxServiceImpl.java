@@ -1,4 +1,4 @@
-package com.github.boly38.mongodump.services;
+package com.github.boly38.mongodump.services.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,19 +25,17 @@ import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.UploadErrorException;
 import com.dropbox.core.v2.users.FullAccount;
+import com.github.boly38.mongodump.services.contract.DropboxService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DropboxService {
+public class DropboxServiceImpl implements DropboxService {
 	public static final String DEFAULT_APP_NAME = "dropbox/Applications/MongoWrapper";
-
-	public static final String DROPBOX_TOKEN_KEY = "DROPBOX_TOKEN";
-	public static final String DROPBOX_APPLICATION_KEY = "DROPBOX_APPLICATION";
 	
 	private DbxClientV2 dboxClient = null;
 
-	public DropboxService() {
+	public DropboxServiceImpl() {
         _initClient();
 	}
 

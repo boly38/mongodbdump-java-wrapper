@@ -1,31 +1,30 @@
-package com.github.boly38.mongodump.services;
+package com.github.boly38.mongodump.services.impl;
 
 import java.io.File;
 
 import com.dropbox.core.v2.files.FileMetadata;
 import com.github.boly38.mongodump.domain.BackupConfiguration;
 import com.github.boly38.mongodump.domain.BackupException;
-import com.github.boly38.mongodump.domain.MongoServerHostConfiguration;
 import com.github.boly38.mongodump.domain.RestoreConfiguration;
 import com.github.boly38.mongodump.domain.RestoreException;
+import com.github.boly38.mongodump.domain.hostconf.IMongoServerHostConfiguration;
+import com.github.boly38.mongodump.services.contract.DropboxMongoBackupService;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Data
-public class DropboxMongoBackupService {
-	private MongodumpService mongoDumpService;
-	private DropboxService dropboxService;
+public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService {
+	private MongodumpServiceImpl mongoDumpService;
+	private DropboxServiceImpl dropboxService;
 	
-	public static DropboxMongoBackupService getInstance(MongoServerHostConfiguration hostConf) {
-		DropboxMongoBackupService svc = new DropboxMongoBackupService();
-		MongodumpService mongoDumpSvc = MongodumpService.getInstance(hostConf);
-		svc.setMongoDumpService(mongoDumpSvc);
-		svc.setDropboxService(new DropboxService());
-		return svc;
+	public DropboxMongoBackupServiceImpl(IMongoServerHostConfiguration hostConf) {
+		MongodumpServiceImpl mongoDumpSvc = new MongodumpServiceImpl(hostConf);
+		this.mongoDumpService = mongoDumpSvc;
+		this.dropboxService = new DropboxServiceImpl();
 	}
-
+	
 	public FileMetadata backup(BackupConfiguration backupConf) throws BackupException {
 		dropboxService.assumeAvailable();
 		String localFileBackup = null;

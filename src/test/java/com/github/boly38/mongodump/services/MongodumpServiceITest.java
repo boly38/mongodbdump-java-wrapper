@@ -10,10 +10,10 @@ import org.junit.Test;
 
 import com.github.boly38.mongodump.domain.BackupConfiguration;
 import com.github.boly38.mongodump.domain.BackupException;
-import com.github.boly38.mongodump.domain.MongoServerHostConfiguration;
 import com.github.boly38.mongodump.domain.RestoreConfiguration;
 import com.github.boly38.mongodump.domain.RestoreException;
-import com.github.boly38.mongodump.services.MongodumpService;
+import com.github.boly38.mongodump.domain.hostconf.MongoServerDefaultHostConfiguration;
+import com.github.boly38.mongodump.services.impl.MongodumpServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +28,7 @@ public class MongodumpServiceITest {
 	final String TEST_DATABASE_NAME = "myDB";
 	final String TEST_BACKUP_NAME   = "myBackup";
 
-	private MongoServerHostConfiguration hostConf = new MongoServerHostConfiguration();
+	private MongoServerDefaultHostConfiguration hostConf = new MongoServerDefaultHostConfiguration();
 
 	// THEN
     public boolean fileExists(String fileFullName) {
@@ -73,7 +73,7 @@ public class MongodumpServiceITest {
 		// GIVEN 
 		// IMPROVEMENT : create dedicated mongo database + content");
 		assumeHostIsReadyForTest();
-		MongodumpService mService = MongodumpService.getInstance(hostConf);
+		MongodumpServiceImpl mService = new MongodumpServiceImpl(hostConf);
 		BackupConfiguration backupConf = getBackupConfiguration();
 		
 		// WHEN 
@@ -93,7 +93,7 @@ public class MongodumpServiceITest {
 		// GIVEN 
 		assumeHostIsReadyForTest();
 		BackupConfiguration backupConf = getBackupConfiguration();
-		MongodumpService mService = MongodumpService.getInstance(hostConf);
+		MongodumpServiceImpl mService = new MongodumpServiceImpl(hostConf);
 		RestoreConfiguration restoreConf = RestoreConfiguration.getInstance(backupConf);
 		log.info("restore from : {}", restoreConf.getBackupFile());		
 		
