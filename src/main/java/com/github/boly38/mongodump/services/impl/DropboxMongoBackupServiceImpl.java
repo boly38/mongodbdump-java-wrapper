@@ -1,8 +1,12 @@
 package com.github.boly38.mongodump.services.impl;
 
 import java.io.File;
+import java.util.List;
 
+import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.ListFolderErrorException;
+import com.dropbox.core.v2.files.Metadata;
 import com.github.boly38.mongodump.domain.BackupConfiguration;
 import com.github.boly38.mongodump.domain.BackupException;
 import com.github.boly38.mongodump.domain.RestoreConfiguration;
@@ -23,6 +27,9 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 		MongodumpServiceImpl mongoDumpSvc = new MongodumpServiceImpl(hostConf);
 		this.mongoDumpService = mongoDumpSvc;
 		this.dropboxService = new DropboxServiceImpl();
+	}
+	public List<Metadata> listFolder(String folderName) throws ListFolderErrorException, DbxException {
+		return dropboxService.listFolder(folderName);
 	}
 	
 	public FileMetadata backup(BackupConfiguration backupConf) throws BackupException {
