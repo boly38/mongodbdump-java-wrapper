@@ -39,7 +39,8 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 			localFileBackup = mongoDumpService.backup(backupConf);
 			FileMetadata dbFile;
 			try {
-				String dropTarget = String.format("/%s.zip", backupConf.getBackupName());
+				String dropTarget = String.format("%s/%s.zip", 
+						backupConf.getBackupRemoteDirectory(), backupConf.getBackupName());
 				dbFile = dropboxService.uploadFile(localFileBackup, dropTarget);
 				log.debug("backup uploaded '{}'", dbFile.getPathLower());
 			} catch (Throwable e) {

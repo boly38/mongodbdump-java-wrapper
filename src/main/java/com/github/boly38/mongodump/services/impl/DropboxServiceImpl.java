@@ -141,7 +141,8 @@ public class DropboxServiceImpl implements DropboxService {
 	 */
 	public List<Metadata> listFolder(String folderName) throws ListFolderErrorException, DbxException {
 		assumeAvailable();
-		return dboxClient.files().listFolder(folderName).getEntries();
+		List<Metadata> entries = dboxClient.files().listFolder(folderName).getEntries();
+		return entries;
 	}
 
 	/**

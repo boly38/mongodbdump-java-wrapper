@@ -16,6 +16,7 @@ public class BackupConfiguration {
 	String dbName = null;
 	String collectionName = null;
 	String backupDirectory = DEFAULT_BACKUP_DIRECTORY;
+	String backupRemoteDirectory = "/"; 
 	
 	private BackupConfiguration(){};
 	
