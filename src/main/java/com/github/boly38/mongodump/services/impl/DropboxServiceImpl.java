@@ -19,6 +19,7 @@ import com.dropbox.core.http.HttpRequestor;
 import com.dropbox.core.http.StandardHttpRequestor;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
@@ -180,5 +181,9 @@ public class DropboxServiceImpl implements DropboxService {
 		String filePath = tmpFile.getAbsolutePath();
 		fOut.close();
 		return filePath;
+	}
+
+	public void removeFile(String dropTarget) throws DeleteErrorException, DbxException {
+		dboxClient.files().delete(dropTarget);
 	}
 }

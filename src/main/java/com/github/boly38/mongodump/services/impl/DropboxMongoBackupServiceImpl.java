@@ -9,6 +9,7 @@ import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.Metadata;
 import com.github.boly38.mongodump.domain.BackupConfiguration;
 import com.github.boly38.mongodump.domain.BackupException;
+import com.github.boly38.mongodump.domain.DeleteException;
 import com.github.boly38.mongodump.domain.RestoreConfiguration;
 import com.github.boly38.mongodump.domain.RestoreException;
 import com.github.boly38.mongodump.domain.hostconf.IMongoServerHostConfiguration;
@@ -39,8 +40,7 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 			localFileBackup = mongoDumpService.backup(backupConf);
 			FileMetadata dbFile;
 			try {
-				String dropTarget = String.format("%s/%s.zip", 
-						backupConf.getBackupRemoteDirectory(), backupConf.getBackupName());
+				String dropTarget = getDropboxFilename(backupConf);
 				dbFile = dropboxService.uploadFile(localFileBackup, dropTarget);
 				log.debug("backup uploaded '{}'", dbFile.getPathLower());
 			} catch (Throwable e) {
@@ -55,6 +55,32 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 				new File(localFileBackup).delete();
 			}
 		}
+	}
+
+	public void removeBackup(BackupConfiguration backupConf) throws DeleteException {
+		String dropTarget = getDropboxFilename(backupConf);
+		try {
+			log.info("removing dropbox file {}", dropTarget);
+			dropboxService.removeFile(dropTarget);
+		} catch (Throwable t) {
+			String errMsg = String.format("Unable to remove backup '%s' : %s", backupConf, t.getMessage());
+			throw new DeleteException(errMsg, t);
+		}
+	}
+	
+	public String getDropboxFilename(BackupConfiguration backupConf) {
+		String remoteDir = backupConf.getBackupRemoteDirectory();
+		String backupName = backupConf.getBackupName();
+		if (remoteDir == null) {
+			throw new IllegalStateException("unable to determine dropbox filename without backup remote directory");
+		}
+		if (backupName == null) {
+			throw new IllegalStateException("unable to determine dropbox filename without backup name");
+		}
+		if (!backupName.endsWith(".zip")) {
+			return String.format("%s/%s.zip", remoteDir, backupName);
+		}
+		return String.format("%s/%s", remoteDir, backupName);
 	}
 
 	public void restore(String dbName, String collName, String backupName) throws RestoreException {
