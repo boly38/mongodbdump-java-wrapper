@@ -29,10 +29,13 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 		this.mongoDumpService = mongoDumpSvc;
 		this.dropboxService = new DropboxServiceImpl();
 	}
+
+	@Override
 	public List<Metadata> listFolder(String folderName) throws ListFolderErrorException, DbxException {
 		return dropboxService.listFolder(folderName);
 	}
 	
+	@Override
 	public FileMetadata backup(BackupConfiguration backupConf) throws BackupException {
 		dropboxService.assumeAvailable();
 		String localFileBackup = null;
@@ -57,17 +60,7 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 		}
 	}
 
-	public void removeBackup(BackupConfiguration backupConf) throws DeleteException {
-		String dropTarget = getDropboxFilename(backupConf);
-		try {
-			log.info("removing dropbox file {}", dropTarget);
-			dropboxService.removeFile(dropTarget);
-		} catch (Throwable t) {
-			String errMsg = String.format("Unable to remove backup '%s' : %s", backupConf, t.getMessage());
-			throw new DeleteException(errMsg, t);
-		}
-	}
-	
+	@Override
 	public String getDropboxFilename(BackupConfiguration backupConf) {
 		String remoteDir = backupConf.getBackupRemoteDirectory();
 		String backupName = backupConf.getBackupName();
@@ -83,19 +76,26 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 		return String.format("%s/%s", remoteDir, backupName);
 	}
 
-	public void restore(String dbName, String collName, String backupName) throws RestoreException {
+	@Override
+	public void restore(BackupConfiguration backupConf) throws RestoreException {
+		String dropBackup = getDropboxFilename(backupConf);
+		String dbName = backupConf.getDbName();
+		String collName = backupConf.getCollectionName();
+		_restore(dbName, collName, dropBackup);
+	}
+
+	private void _restore(String dbName, String collName, String backupFullName) throws RestoreException {
 		dropboxService.assumeAvailable();
 		String localFileBackup = null;
 		try {
-			String dropSource = String.format("/%s.zip", backupName);
 			try {
-				localFileBackup = dropboxService.downloadFile(dropSource);
+				localFileBackup = dropboxService.downloadFile(backupFullName);
 			} catch (Throwable e) {
-				String errMsg = String.format("Unable to download backup '%s' : %s", backupName, e.getMessage());
+				String errMsg = String.format("Unable to download backup '%s' : %s", backupFullName, e.getMessage());
 				throw new RestoreException(errMsg, e);
 			}
 			if (localFileBackup == null) {
-				String errMsg = String.format("Backup '%s' not found", backupName);
+				String errMsg = String.format("Backup '%s' not found", backupFullName);
 				throw new RestoreException(errMsg);
 			}
 			RestoreConfiguration restoreConf = RestoreConfiguration.getInstance(dbName, collName, localFileBackup);
@@ -109,4 +109,17 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 			}
 		}
 	}
+
+	@Override
+	public void removeBackup(BackupConfiguration backupConf) throws DeleteException {
+		String dropTarget = getDropboxFilename(backupConf);
+		try {
+			log.info("removing dropbox file {}", dropTarget);
+			dropboxService.removeFile(dropTarget);
+		} catch (Throwable t) {
+			String errMsg = String.format("Unable to remove backup '%s' : %s", backupConf, t.getMessage());
+			throw new DeleteException(errMsg, t);
+		}
+	}
+	
 }

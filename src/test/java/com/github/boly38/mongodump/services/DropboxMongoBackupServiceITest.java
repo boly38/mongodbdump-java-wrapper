@@ -42,9 +42,10 @@ public class DropboxMongoBackupServiceITest {
 	public void should_restore() throws RestoreException {
 		// GIVEN
 		DropboxMongoBackupServiceImpl dbmSvc = new DropboxMongoBackupServiceImpl(hostConf);
-		log.info("restore from : {}", TEST_BACKUP_NAME);		
+		BackupConfiguration backupConf = getBackupConfiguration();
+		log.info("restore from : {}", TEST_BACKUP_NAME);
 		// WHEN
-		dbmSvc.restore(TEST_DATABASE_NAME, null, TEST_BACKUP_NAME);
+		dbmSvc.restore(backupConf);
 		// THEN
 		// THEN
 		// IMPROVEMENT : check mongo content
