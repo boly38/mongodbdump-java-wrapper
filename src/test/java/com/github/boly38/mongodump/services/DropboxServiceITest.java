@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -38,7 +37,7 @@ public class DropboxServiceITest {
 		should_list_directory("/essai", 1);
 	}
 
-	private void should_list_directory(String dirName, int dirFileCount) throws ListFolderErrorException, DbxException {
+	private void should_list_directory(String dirName, int dirFileMinCount) throws ListFolderErrorException, DbxException {
 		// GIVEN
 		DropboxServiceImpl dboxSvc = assumeDroptboxRequirement();
 		// WHEN
@@ -48,13 +47,16 @@ public class DropboxServiceITest {
 		for (Metadata m : listFolder) {
 			log.info(m.getPathLower());
 		}
-		Assertions.assertThat(listFolder.size()).isEqualTo(dirFileCount);
+		Assertions.assertThat(listFolder.size()).isGreaterThanOrEqualTo(dirFileMinCount);
 	}
 
 
 	private String getTestImagePath() throws URISyntaxException {
-		URL resource = DropboxServiceITest.class.getResource("../../../../image.jpg");
-		String imagePath = (Paths.get(resource.toURI()).toFile()).getAbsolutePath();
+		URL resource = getClass().getClassLoader().getResource("image.jpg");
+		if (resource ==  null) {
+			return null;
+		}
+		String imagePath = new File(resource.toURI()).getAbsolutePath();
 		return imagePath;
 	}
 

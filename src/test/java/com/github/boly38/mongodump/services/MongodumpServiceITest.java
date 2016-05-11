@@ -103,28 +103,4 @@ public class MongodumpServiceITest {
 		// THEN
 		// IMPROVEMENT : check mongo content
 	}
-
-	
-	/**
-	 * backup TEST_DATABASE_NAME database into zip file located in a dropbox directory
-	 * require DROPBOX_TOKEN environment variable set
-	 *
-	@Test
-	public void should_backup_database_on_dropbox() throws RestoreException {
-		// GIVEN 
-		// IMPROVEMENT : create dedicated mongo database + content");
-		assumeHostIsReadyForTest();
-		MongodumpService mService = MongodumpService.getInstance(hostConf);
-		BackupConfiguration backupConf = getBackupConfiguration();
-		
-		// WHEN 
-		String backupFile = mService.backup(backupConf);
-
-		// THEN
-		log.info("backup file created : {}", backupFile);
-		assertFile(backupFile);
-	}
-	*/
-
-
 }

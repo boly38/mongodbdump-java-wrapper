@@ -42,12 +42,12 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 		try {	
 			localFileBackup = mongoDumpService.backup(backupConf);
 			FileMetadata dbFile;
+			String dropTarget = getDropboxFilename(backupConf);
 			try {
-				String dropTarget = getDropboxFilename(backupConf);
 				dbFile = dropboxService.uploadFile(localFileBackup, dropTarget);
 				log.debug("backup uploaded '{}'", dbFile.getPathLower());
 			} catch (Throwable e) {
-				String exMsg = String.format("Unable to upload backup to dropbox : %s", e.getMessage());
+				String exMsg = String.format("Unable to upload backup '%s' to dropbox : %s", dropTarget, e.getMessage());
 				throw new BackupException(exMsg, e);
 			}
 			return dbFile;
@@ -70,10 +70,13 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 		if (backupName == null) {
 			throw new IllegalStateException("unable to determine dropbox filename without backup name");
 		}
-		if (!backupName.endsWith(".zip")) {
-			return String.format("%s/%s.zip", remoteDir, backupName);
+		if (!remoteDir.endsWith("/")) {
+			remoteDir = String.format("%s/", remoteDir);
 		}
-		return String.format("%s/%s", remoteDir, backupName);
+		if (!backupName.endsWith(".zip")) {
+			return String.format("%s%s.zip", remoteDir, backupName);
+		}
+		return String.format("%s%s", remoteDir, backupName);
 	}
 
 	@Override
