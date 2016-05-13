@@ -7,5 +7,4 @@ public class HostInfo {
 	public static boolean isWindows() {
         return (OS.indexOf("win") >= 0);
     }
-
 }

@@ -51,9 +51,88 @@ public class MongodumpServiceImpl implements MongodumpService {
 		String cmd = getHostConfig().getMongoDumpBinAbsolutePath();
 		String collection = backupConf != null ? backupConf.getCollectionName() : null;
 		String finalBackupName = backupConf != null ? backupConf.getAbsoluteBackupName() : null;
-		return _backupCmd(cmd, db, collection, finalBackupName);
+		boolean openshiftMode = System.getenv("OPENSHIFT_MONGODB_DB_URL") != null;
+		if (!openshiftMode) {
+			return _backupCmd(cmd,  db, collection, finalBackupName);
+		}
+		return _openshiftBackupCmd(cmd, db, collection, finalBackupName);
 	}
 
+	// Openshift backup
+	private String _openshiftBackupCmd(String cmd, String db, String collection, String finalBackupName) throws BackupException {
+		String mongoHost = String.format("%s:%s", 
+				System.getenv("OPENSHIFT_MONGODB_DB_HOST"), 
+				System.getenv("OPENSHIFT_MONGODB_DB_PORT"));
+		String mongoUser = System.getenv("OPENSHIFT_MONGODB_DB_USERNAME");
+		String mongoPass = System.getenv("OPENSHIFT_MONGODB_DB_PASSWORD");
+		String intermediateFile = finalBackupName != null && finalBackupName.endsWith(".zip") 
+				? finalBackupName.substring(0, finalBackupName.length() - 4) 
+				: finalBackupName;
+
+		ProcessBuilder builder = null;
+		if (collection != null) {
+			builder = new ProcessBuilder(cmd, 
+					"--db", db, "--collection", collection,
+					"--host", mongoHost, "--username", mongoUser, "--password", mongoPass,
+					"--out", intermediateFile);
+		} else {
+			builder = new ProcessBuilder(cmd,
+					"--db", db, 
+					"--host", mongoHost, "--username", mongoUser, "--password", mongoPass,
+					"--out", intermediateFile);
+		}
+		int passSize = mongoPass != null ? mongoPass.length() : 0;
+		log.info("openshift backup cmd:{}, db:{} ({}:###{}b@{}) tmp:{} finalZipName:{}", 
+				cmd, db, mongoUser, passSize, mongoHost, intermediateFile, finalBackupName);
+		try {
+			SpyLogs spyLogs = new SpyLogs();
+			SpyLogs spyErrorLogs = new SpyLogs();
+            int errorId = spyErrorLogs.addSpy("error");
+			Process process = builder.start();
+			log.info("please notice that mongodump reports all dump action into stderr (not only errors)");
+            StreamPrinter fluxErreur = new StreamPrinter("[mongodump ERR]", process.getErrorStream(), spyErrorLogs);
+            StreamPrinter fluxSortie = new StreamPrinter("[mongodump]",     process.getInputStream(), spyLogs);
+            fluxErreur.start();
+            fluxSortie.start();
+			process.waitFor();
+
+			String errorMsg = null;
+            int exitValue = process.exitValue();
+            if (exitValue == 0) {
+        		log.info("BACKUP created : {}", intermediateFile);
+        		ProcessBuilder zipBuilder = new ProcessBuilder("zip","-r",finalBackupName,intermediateFile);
+        		Process zipProcess = zipBuilder.start();
+                StreamPrinter zipfluxErreur = new StreamPrinter("[zip ERR]", process.getErrorStream(), spyErrorLogs);
+                StreamPrinter zipfluxSortie = new StreamPrinter("[zip]",     process.getInputStream(), spyLogs);
+                zipfluxErreur.start();
+                zipfluxSortie.start();
+                zipProcess.waitFor();
+                int zipExitValue = zipProcess.exitValue();
+                if (zipExitValue == 0) {
+                	log.info("BACKUP created : {}", finalBackupName);
+                	return finalBackupName;
+                }
+                if (!spyErrorLogs.hasSpy(errorId)) {
+                	errorMsg = spyErrorLogs.getRecorderdSpy(errorId);
+                }
+                throw new BackupException(exitValue, errorMsg);
+            }
+            if (!spyErrorLogs.hasSpy(errorId)) {
+            	errorMsg = spyErrorLogs.getRecorderdSpy(errorId);
+            }
+            throw new BackupException(exitValue, errorMsg);
+		} catch (IOException e) {
+			String errMsg = String.format("Error during the backup of '%s' : %s", db, e.getMessage());
+			log.error(errMsg, e);
+			throw new BackupException(errMsg);
+		} catch (InterruptedException e) {
+			String errMsg = String.format("Interruption during the backup of '{}' : {}", db, e.getMessage());
+			log.error(errMsg, e);
+			throw new BackupException(errMsg);
+		}
+	}
+
+	// Common case backup
 	private String _backupCmd(String cmd, String db, String collection, String finalBackupName) throws BackupException {
 		log.info("backup cmd:{}, db:{}, collection:{}, finalZipName:{}",
 				cmd, db, collection != null ? collection : "(not set)", finalBackupName);
@@ -72,8 +151,8 @@ public class MongodumpServiceImpl implements MongodumpService {
             int errorId = spyErrorLogs.addSpy("error");
 			Process process = builder.start();
 			log.info("please notice that mongodump reports all dump action into stderr (not only errors)");
-            StreamPrinter fluxErreur = new StreamPrinter("[mongodump.exe ERR]", process.getErrorStream(), spyErrorLogs);
-            StreamPrinter fluxSortie = new StreamPrinter("[mongodump.exe]",     process.getInputStream(), spyLogs);
+            StreamPrinter fluxErreur = new StreamPrinter("[mongodump ERR]", process.getErrorStream(), spyErrorLogs);
+            StreamPrinter fluxSortie = new StreamPrinter("[mongodump]",     process.getInputStream(), spyLogs);
             fluxErreur.start();
             fluxSortie.start();
 
@@ -97,7 +176,6 @@ public class MongodumpServiceImpl implements MongodumpService {
 			log.error(errMsg, e);
 			throw new BackupException(errMsg);
 		}
-
 	}
 
 	/**

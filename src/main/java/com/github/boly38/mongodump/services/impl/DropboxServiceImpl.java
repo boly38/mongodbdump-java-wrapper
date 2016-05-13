@@ -117,6 +117,9 @@ public class DropboxServiceImpl implements DropboxService {
 
 	public void assumeAvailable() {
 		if (!isAvailable()) {
+			_initClient();
+		}
+		if (!isAvailable()) {
 			warnUsage();
 			throw new IllegalStateException("DropBox client is not available");
 		}
