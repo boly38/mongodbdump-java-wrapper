@@ -92,6 +92,7 @@ public class DropboxMongoBackupServiceImpl implements DropboxMongoBackupService 
 		String localFileBackup = null;
 		try {
 			try {
+				// openshift: cd OPENSHIFT_DATA_DIR ??
 				localFileBackup = dropboxService.downloadFile(backupFullName);
 			} catch (Throwable e) {
 				String errMsg = String.format("Unable to download backup '%s' : %s", backupFullName, e.getMessage());
