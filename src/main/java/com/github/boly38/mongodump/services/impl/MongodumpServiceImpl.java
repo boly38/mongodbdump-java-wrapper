@@ -100,13 +100,11 @@ public class MongodumpServiceImpl implements MongodumpService {
 		String action = String.format("backup '%s' to '%s'", dbName, intermediateFile);
 		try {
 			intermediateFile = _hostBackupProcessCommand("mongodump", cmdArgs, intermediateFile);
-    		log.info("backup directory created : {}", intermediateFile);
-    		
+
     		action = String.format("zip backup '%s' to '%s'", intermediateFile, finalBackupName);
     		List<String> zipcmdArgs = null;
-    		zipcmdArgs = Arrays.asList("zip","-r",finalBackupName,intermediateFile);
+    		zipcmdArgs = Arrays.asList("zip","-rj",finalBackupName,intermediateFile);
     		finalBackupName = _hostBackupProcessCommand("zip", zipcmdArgs, finalBackupName);
-    		log.info("backup zip created : {}", intermediateFile);
 			return finalBackupName;
 		}  catch (Throwable t) {
 			String errMsg = String.format("Error during %s : %s", action, t.getMessage());
@@ -143,6 +141,17 @@ public class MongodumpServiceImpl implements MongodumpService {
 			throw new BackupException(errMsg);
 		}
 	}
+	
+	public String stringArrayToString(List<String> list) {
+		StringBuilder sb = new StringBuilder();
+		for (String s : list)
+		{
+			sb.append(s);
+		    sb.append(" ");
+		}
+
+		return sb.toString();
+	}
 
 	private String _hostBackupProcessCommand(String processName, List<String> cmdArgs, String outFileName)
 			throws IOException, InterruptedException, BackupException {
@@ -150,6 +159,7 @@ public class MongodumpServiceImpl implements MongodumpService {
 		SpyLogs spyLogs = new SpyLogs();
 		SpyLogs spyErrorLogs = new SpyLogs();
 		int errorId = spyErrorLogs.addSpy("error");
+		log.info("{} : {}", processName, stringArrayToString(cmdArgs));
 		Process process = builder.start();
 		if ("mongodump".equals(processName)) {
 			log.info("please notice that mongodump reports all dump action into stderr (not only errors)");
@@ -162,7 +172,7 @@ public class MongodumpServiceImpl implements MongodumpService {
 		process.waitFor();
 		int exitValue = process.exitValue();
 		if (exitValue == 0) {
-			log.info("file created : {}", outFileName);
+			log.info("created : {}", outFileName);
 			return outFileName;
 		}
 		String errorMsg = null;
@@ -231,8 +241,8 @@ public class MongodumpServiceImpl implements MongodumpService {
     		action = String.format("mongorestore '%s'", intermediateDir);
     		List<String> cmdArgs;
     		if (collectionName != null) {
-    			cmdArgs = Arrays.asList(mongoRestoreCmd, 
-    					"--db", dbName, "--collection", collectionName,
+    			cmdArgs = Arrays.asList(mongoRestoreCmd,
+    					"--drop", "--db", dbName, "--collection", collectionName,
     					"--host", mongoHost, "--username", mongoUser, "--password", mongoPass,
     					intermediateDir);
     		} else {
@@ -286,6 +296,7 @@ public class MongodumpServiceImpl implements MongodumpService {
 		SpyLogs spyErrorLogs = new SpyLogs();
 		int errorId = spyErrorLogs.addSpy("error");
 		int failedId = spyErrorLogs.addSpy("Failed");
+		log.info("{} : {}", processName, stringArrayToString(cmdArgs));
 		Process process = builder.start();
 		if ("mongorestore".equals(processName)) {
 			log.info("please notice that mongorestore reports all restore action into stderr (not only errors)");
