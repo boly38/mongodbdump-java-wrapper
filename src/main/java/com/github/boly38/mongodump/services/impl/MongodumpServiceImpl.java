@@ -247,7 +247,7 @@ public class MongodumpServiceImpl implements MongodumpService {
     					intermediateDir);
     		} else {
     			cmdArgs = Arrays.asList(mongoRestoreCmd,
-    					"--db", dbName, 
+    					"--drop", "--db", dbName, 
     					"--host", mongoHost, "--username", mongoUser, "--password", mongoPass,
     					intermediateDir);
     			_hostRestoreProcessCommand("mongorestore", cmdArgs, intermediateDir);
